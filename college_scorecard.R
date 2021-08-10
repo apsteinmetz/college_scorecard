@@ -7,6 +7,10 @@ raw_majors_current <- read_csv("data/Most-Recent-Cohorts-Field-of-Study.csv")
 
 raw_majors_2years_ago <- read_csv("data/FieldOfStudyData1415_1516_PP.csv")
 
+peers_finance <- read_csv("data/peer list finance.csv")
+peers_kb <- read_csv("data/peer list kb.csv")
+
+
 majors_current <- raw_majors_current %>%
   select(UNITID,INSTNM,CIPDESC,CIPCODE,CREDLEV,CREDDESC,EARN_MDN_HI_2YR) %>%
   filter(str_detect(EARN_MDN_HI_2YR,"Privacy",negate = TRUE)) %>%
@@ -21,19 +25,33 @@ majors_2years_ago <- raw_majors_2years_ago %>%
 debt_vs_earnings <- inner_join(majors_2years_ago,majors_current) %>%
   mutate(CREDDESC = fct_reorder(as_factor(CREDDESC),CREDLEV)) %>%
   mutate(debt_ratio = EARN_MDN_HI_2YR/DEBT_ALL_STGP_EVAL_MDN) %>%
-  mutate(CIPDESC = as.factor(CIPDESC))
+  mutate(CIPDESC = as.factor(CIPDESC)) %>%
+  rename(college = INSTNM,
+         concentration = CIPDESC,
+         earnings=EARN_MDN_HI_2YR,
+         debt=DEBT_ALL_STGP_EVAL_MDN,
+         degree=CREDDESC)
 
-colleges = c("Colgate University","Denison University")
+colleges = peers_finance$college
+
+denison_majors <- debt_vs_earnings %>%
+  filter(college == "Denison University") %>%
+  pull(concentration) %>%
+  unique() %>%
+  as.character()
+
 subset_field <- debt_vs_earnings %>%
-  filter(INSTNM %in% colleges) %>%
+  filter(college %in% colleges) %>%
+  filter(concentration %in% denison_majors) %>%
   filter(CREDLEV == 3)
 
+
 limits = c(
-  min(subset_field$DEBT_ALL_STGP_EVAL_MDN,subset_field$EARN_MDN_HI_2YR),
-  max(subset_field$DEBT_ALL_STGP_EVAL_MDN,subset_field$EARN_MDN_HI_2YR)
+  min(subset_field$debt,subset_field$earnings),
+  max(subset_field$debt,subset_field$earnings)
 )
 subset_field %>%
-  ggplot(aes(DEBT_ALL_STGP_EVAL_MDN,EARN_MDN_HI_2YR,color=INSTNM,label=CIPDESC)) +
+  ggplot(aes(debt,earnings,color=college,label=concentration)) +
   geom_point() +
 #  geom_text() +
   geom_abline(slope = 1,intercept = 0) +
@@ -46,7 +64,7 @@ subset_field %>%
        caption = "Source: U.S. Dept. of Education")
 
 subset_field %>%
-  ggplot(aes(CIPDESC,EARN_MDN_HI_2YR,color=INSTNM)) +
+  ggplot(aes(concentration,earnings,color=college)) +
 #  geom_col(position = "dodge") +
   scale_y_continuous(label=scales::dollar) +
   geom_point() +
