@@ -20,7 +20,8 @@ majors_2years_ago <- raw_majors_2years_ago %>%
 # Join to get debt at time of graduation and earnings two-years later for the same people
 debt_vs_earnings <- inner_join(majors_2years_ago,majors_current) %>%
   mutate(CREDDESC = fct_reorder(as_factor(CREDDESC),CREDLEV)) %>%
-  mutate(debt_ratio = EARN_MDN_HI_2YR/DEBT_ALL_STGP_EVAL_MDN)
+  mutate(debt_ratio = EARN_MDN_HI_2YR/DEBT_ALL_STGP_EVAL_MDN) %>%
+  mutate(CIPDESC = as.factor(CIPDESC))
 
 colleges = c("Colgate University","Denison University")
 subset_field <- debt_vs_earnings %>%
@@ -42,4 +43,16 @@ subset_field %>%
        subtitle = "Selected Colleges",
        x= "Debt at Graduation",
        y = "Earnings Two Years After Graduation",
+       caption = "Source: U.S. Dept. of Education")
+
+subset_field %>%
+  ggplot(aes(CIPDESC,EARN_MDN_HI_2YR,color=INSTNM)) +
+#  geom_col(position = "dodge") +
+  scale_y_continuous(label=scales::dollar) +
+  geom_point() +
+  coord_flip() +
+  labs(title = "Earnings for 2017 Graduates",
+       subtitle = "Only Concentrations With Sufficient Data",
+       y="Median Earnings 2 Years After Graduation",
+       x= "Concentration",
        caption = "Source: U.S. Dept. of Education")
