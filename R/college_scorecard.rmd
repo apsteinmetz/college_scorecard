@@ -20,7 +20,7 @@ library(ggmulti) # for ggplot glyphs
 library(png)
 
 # load data
-# raw_score <- read_csv("data/Most-Recent-Cohorts-All-Data-Elements.csv")
+raw_score <- read_csv("data/Most-Recent-Cohorts-All-Data-Elements.csv")
 
 #data source: https://data.ed.gov/dataset/college-scorecard-all-data-files-through-6-2020/resources
 raw_majors_current <- read_csv("../data/Most-Recent-Cohorts-Field-of-Study.csv")
