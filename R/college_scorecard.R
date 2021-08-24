@@ -173,6 +173,7 @@ subset_profiles %>%
   labs(title= "Debt Principal for All and Low-Income-Family Graduates",
        y = "",
        x= "",
+       subtitle = "Red is Debt of Low Income Students",
        caption = "Source: U.S. Dept. of Education") +
   coord_flip()
 # ------------------------------------------------
@@ -180,6 +181,7 @@ subset_profiles %>%
 subset_field %>%
   ggplot(aes(comp_fee_2122,earnings,color= college)) +
   geom_point() +
+  geom_line() +
   #  geom_text() +
   #  scale_x_continuous(limits=plot_limits,label=scales::dollar) +
   #  scale_y_continuous(limits=plot_limits,label=scales::dollar) +
