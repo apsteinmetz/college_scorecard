@@ -172,8 +172,8 @@ subset_profiles %>%
   scale_x_continuous(label=scales::dollar) +
   geom_vline(xintercept=median(subset_profiles$avg_net_priv)) +
   geom_hline(yintercept=median(subset_profiles$median_adj_earnings)) +
-  annotate(geom = "text",x = 20000,y=50000,label="Higher Value",size=5, color="darkgreen") +
-  annotate(geom = "text",x = 35000,y=30000,label="Lower Value",size=5,color="red") +
+  annotate(geom = "text",x = 20000,y=50000,label="Better Value",size=5, color="darkgreen") +
+  annotate(geom = "text",x = 35000,y=30000,label="Worse Value",size=5,color="red") +
   labs(title= "Net Cost vs. Earnings Two Years after Graduation",
        subtitle = "Earnings Adjusted to Only Include Majors Offered at Denison",
        y = "Adjusted Earnings",
