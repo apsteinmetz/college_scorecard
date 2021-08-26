@@ -2,16 +2,17 @@
 title: "Denison Outcomes vs. Peer Colleges"
 author: "Art Steinmetz"
 date: "8/17/2021"
-output: html_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Comparison of Debt and Earnings
-Debt at graduation in 2017 and earnings two years later.
-
+## Comparing Denison to our Peer Colleges
+### Cost, Debt and Earnings
 
 ```{r load, message=FALSE, warning=TRUE, include=FALSE}
 library(tidyverse)
@@ -84,32 +85,28 @@ denison_majors <- debt_vs_earnings %>%
 agg_earnings <- debt_vs_earnings %>%
   filter(CREDLEV == 3) %>% 
   group_by(college) %>% 
-  summarize(avg_earnings=mean(earnings),median_earnings = median(earnings))
+  summarize(avg_earnings=mean(earnings),median_earnings = median(earnings)) %>% 
+  mutate(across(where(is.double),round))
 
 # earnings calculated only from majors that Denison offers
 agg_adj_earnings <- debt_vs_earnings %>%
   filter(CREDLEV == 3) %>% 
   filter(concentration %in% denison_majors) %>%
   group_by(college) %>% 
-  summarize(avg_adj_earnings=mean(earnings),median_adj_earnings = median(earnings))
+  summarize(avg_adj_earnings=mean(earnings),median_adj_earnings = median(earnings)) %>% 
+  mutate(across(where(is.double),round))
 
+# add Elon to peers
 colleges = c(peers_finance$college,"Elon University")
-
-
-subset_field <- debt_vs_earnings %>%
-  filter(college %in% colleges) %>%
-  left_join(peers_finance) %>%
-  filter(concentration %in% denison_majors) %>%
-  filter(CREDLEV == 3) %>%  #Bachelors
-  mutate(college = str_remove(college," College| University")) %>%
-  mutate(college = str_remove(college,"The of "))
+elon_cost = profiles %>% filter(college=="Elon University") %>% pull(avg_cost)
 
 subset_field_all_majors <- debt_vs_earnings %>%
   filter(college %in% colleges) %>%
   left_join(peers_finance) %>%
   filter(CREDLEV == 3) %>%  #Bachelors
   mutate(college = str_remove(college," College| University")) %>%
-  mutate(college = str_remove(college,"The of "))
+  mutate(college = str_remove(college,"The of ")) %>% 
+  mutate(comp_fee_2122=ifelse(college=="Elon",elon_cost,comp_fee_2122))
 
 subset_field <- subset_field_all_majors %>%
   filter(concentration %in% denison_majors)
@@ -124,7 +121,7 @@ highlight_schools = c("Denison")
 subset_highlight = filter(subset_field,college %in% highlight_schools)
 ```
 
-```{r display profiles}
+```{r display profiles, echo=FALSE, message=FALSE, warning=FALSE}
 # -------------------------------------------------
 # display profiles
 subset_profiles <- profiles %>%
@@ -138,14 +135,17 @@ subset_profiles <- profiles %>%
   mutate(college = as.factor(college))
 
 subset_profiles %>%
-  select(college,avg_cost,avg_net_priv,net_cost_low_income_priv,debt,debt_low_income,avg_earnings,avg_adj_earnings) %>%
+  select(college,avg_cost,avg_net_priv,net_cost_low_income_priv,
+         debt,debt_low_income,avg_earnings,avg_adj_earnings) %>%
   mutate(across(where(is.double),~scales::dollar(.x,trim=FALSE),.names="{.col}")) %>%
   arrange(avg_cost) %>%
-  kableExtra::kable() %>%
+  kableExtra::kable(
+    col.names = c("School","Gross Price","Net Price","Net Price\n(low inc)",
+                  "Avg Debt","Avg Debt\n(low inc)","Grad Earnings","Grad Earnings(adj)")) %>%
   {.}
 ```
 
-```{r gross and net cost}
+```{r gross and net cost, echo=FALSE}
 # ------------------------------------------------
 # profile plots
 subset_profiles %>%
@@ -154,11 +154,45 @@ subset_profiles %>%
   ggplot() +
   geom_col(aes(reorder(college,avg_net_priv),avg_cost),fill="blue") +
   geom_col(aes(reorder(college,avg_net_priv),avg_net_priv)) +
+  scale_y_continuous(labels = scales::dollar) +
   labs(title= "Gross and Net Cost",
        y = "Average Cost",
        x= "",
        caption = "Source: U.S. Dept. of Education") +
   coord_flip()
+
+```
+```{r net cost vs earnings, echo=FALSE, message=FALSE, warning=FALSE}
+subset_profiles %>%
+  ggplot() +
+  geom_point(aes(avg_net_priv,median_adj_earnings)) +
+  #  geom_text(aes(x=1-avg_net_priv/avg_cost,y=pct_white,label = college)) +
+  ggrepel::geom_text_repel(aes(x=avg_net_priv,y=median_adj_earnings,label = college)) +
+  scale_y_continuous(label=scales::dollar) +
+  scale_x_continuous(label=scales::dollar) +
+  geom_vline(xintercept=median(subset_profiles$avg_net_priv)) +
+  geom_hline(yintercept=median(subset_profiles$median_adj_earnings)) +
+  annotate(geom = "text",x = 20000,y=50000,label="Higher Value",size=5, color="darkgreen") +
+  annotate(geom = "text",x = 35000,y=30000,label="Lower Value",size=5,color="red") +
+  labs(title= "Net Cost vs. Earnings Two Years after Graduation",
+       subtitle = "Earnings Adjusted to Only Include Majors Offered at Denison",
+       y = "Adjusted Earnings",
+       x= "Net Cost",
+       caption = "Source: U.S. Dept. of Education")
+```
+```{r debt by income cohort}
+subset_profiles %>%
+  ggplot() +
+  geom_col(aes(reorder(college,debt_low_income),debt),fill="orange") +
+  geom_col(aes(reorder(college,debt_low_income),debt_low_income),fill="red") +
+  scale_y_continuous(label=scales::dollar) +
+  labs(title= "Debt Principal for All and Low-Income-Family Graduates",
+       y = "",
+       x= "",
+       subtitle = "Red is Debt of Low Income Students",
+       caption = "Source: U.S. Dept. of Education") +
+  coord_flip()
+}
 
 ```
 
@@ -197,7 +231,7 @@ subset_profiles %>%
 ```
 
 
-```{r selectivity}
+```{r selectivity, message=FALSE, warning=FALSE}
 subset_profiles %>%
   ggplot() +
   geom_point(aes(sat_test_avg,adm_rate)) +
@@ -206,10 +240,10 @@ subset_profiles %>%
   scale_y_continuous(label=scales::percent) +
   # scale_x_continuous(label=scales::percent) +
   labs(title= "Test Scores Vs. Selectivity",
+       subtitle ="Note: Some Peer Schools Don't Report Test Scores",
        y = "Adminssion Rate",
        x= "SAT Test Average",
        caption = "Source: U.S. Dept. of Education")
-
 
 ```
 
@@ -227,7 +261,7 @@ subset_field %>%
   #  scale_y_continuous(limits=plot_limits,label=scales::dollar) +
   scale_x_continuous(label=scales::dollar) +
   scale_y_continuous(limits=c(0,max(subset_field$earnings)),label=scales::dollar) +
-  labs(title = "College Price vs. Earnings",
+  labs(title = "College Price vs. Earnings by Concentration",
        subtitle = "Only Concentrations at Peer Colleges\nWith Sufficient Data and Offered at Denison",
        x= "Full Price",
        y = "Earnings Two Years After Graduation",
@@ -245,10 +279,63 @@ subset_field %>%
   theme(legend.position = "none") +
   coord_flip()
 
+
+```
+```{r price vs debt}
+# debt
+subset_field %>%
+  ggplot(aes(earnings,debt,color=college,label=concentration)) +
+  geom_point() +
+  #  geom_text() +
+  # geom_abline(slope = 1,intercept = 0) +
+  #  scale_x_continuous(limits=plot_limits,label=scales::dollar) +
+  #  scale_y_continuous(limits=plot_limits,label=scales::dollar) +
+  scale_x_continuous(label=scales::dollar) +
+  scale_y_continuous(label=scales::dollar) +
+  labs(title = "College Earnings vs. Debt by Concentration",
+       subtitle = "Only Concentrations at Peer Colleges\nWith Sufficient Data and Offered at Denison",
+       y = "Debt at Graduation",
+       x = "Earnings Two Years After Graduation",
+       caption = "Source: U.S. Dept. of Education") +
+  #  geom_point(data=subset_highlight,size = 5,color = "red") +
+  geom_text(data=subset_highlight,label = "DU",color = "red") +
+  # geom_image_glyph(data=subset_highlight,
+  #                  mapping = aes(x = debt, y = earnings),
+  #                  imagewidth = 0.5,
+  #                  imageheight = 0.5,
+  #                  colour = NA,
+  #                  interpolate = TRUE,
+  #                  images=d_glyph) +
+  theme(legend.position = "none")
+
+```
+
+```{r}
+# Earnings
+ subset_field %>%
+  ggplot(aes(concentration,earnings)) +
+  scale_y_continuous(label=scales::dollar) +
+  geom_point() +
+  geom_boxplot() +
+  coord_flip() +
+  labs(title = "Earnings for 2017 Graduates by Concentration",
+       subtitle = "Only Concentrations at Peer Colleges\nWith Sufficient Data and Offered at Denison",
+       y="Median Earnings 2 Years After Graduation",
+       x= "Concentration",
+       caption = "Source: U.S. Dept. of Education") +
+  geom_text(data=subset_highlight,label = "DU",color = "red") +
+  # geom_image_glyph(data=subset_highlight,
+  #                  mapping = aes(x = debt, y = earnings),
+  #                  imagewidth = 0.5,
+  #                  imageheight = 0.5,
+  #                  colour = NA,
+  #                  interpolate = TRUE,
+  #                  images=d_glyph) +
+  theme(legend.position = "none")
+
 ```
 
 ```{r debt, echo=FALSE}
-
 # Debt
 subset_field %>%
   ggplot(aes(concentration,debt)) +
@@ -270,12 +357,6 @@ subset_field %>%
   #                  interpolate = TRUE,
   #                  images=d_glyph) +
   theme(legend.position = "none")
-```
-
-```{r plot earnings vs debt, echo=FALSE}
-
-
-
 ```
 
 ```{r earnings-debt ratio, echo=FALSE}

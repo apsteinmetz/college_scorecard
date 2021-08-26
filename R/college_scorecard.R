@@ -205,6 +205,7 @@ subset_field %>%
   theme(legend.position = "none") +
   coord_flip()
 
+# debt
 subset_field %>%
   ggplot(aes(debt,earnings,color=college,label=concentration)) +
   geom_point() +
