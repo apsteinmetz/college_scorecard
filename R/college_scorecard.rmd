@@ -3,7 +3,7 @@ title: "Denison Outcomes vs. Peer Colleges"
 author: "Art Steinmetz"
 date: "8/17/2021"
 output:
-  html_document:
+  html_notebook:
     df_print: paged
 ---
 
@@ -11,8 +11,17 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Comparing Denison to our Peer Colleges
 ### Cost, Debt and Earnings
+
+The charts below are an exploration of the data available from the U.S. Dept. of Education College Scorecard. The raw data files I used can be found at [data.ed.gov](https://data.ed.gov/dataset/college-scorecard-all-data-files-through-6-2020/resources?resource=ff68afc4-6d23-459d-9f60-4006e4f85583). This is NOT an analysis and no firm conclusions should be drawn from the charts.  The observations I make are drawn simply from looking at the charts and may paint an incomplete or faulty picture due to inaccurate or incomplete data.  There are hundreds of similar fields in the data sets so I may not be taking the most appropriate ones in all cases.  I am new to this data so I may be making other mistakes as well.
+
+This survey includes our peer schools plus Elon, a school which Adam Weinberg mentions frequently.  Elon is three times the size of Denison and is an outlier in several other ways as we shall see.
+
+The basic questions I am looking at are the relationship of college cost, student debt and future earnings.  My motivation is to understand how we set Denison students up for success relative to our peer schools.  Success is not necessarily measured only by the data available from the DOE but it is a useful starting point.
+
+The DOE data includes earnings and debt data by major. Where there is sufficient data and both Denison and the peer school have the majors I include them.  Where I look at aggregate earnings, I adjust for those majors common to both schools. In practice, this means my "adjusted earnings" for schools with, say, engineering degrees remove earnings for those majors since they are not offered at Dension. I also take out debt and earnings data for post-graduate programs since Denison does not have a graduate school.
+
+Looking at the tabular data below, we see that the adjusted earnings come close to raw earnings in most cases, suggesting that the peer schools are well matched in terms of the academic programs offered.
 
 ```{r load, message=FALSE, warning=TRUE, include=FALSE}
 library(tidyverse)
@@ -145,6 +154,8 @@ subset_profiles %>%
   {.}
 ```
 
+The chart below shows gross and net price.  There doesn't seem to be much correlation between the two amounts.  Elon stands out for having a substantially cheaper list price than any of the peer colleges, yet has the highest realized net price.
+
 ```{r gross and net cost, echo=FALSE}
 # ------------------------------------------------
 # profile plots
@@ -162,6 +173,9 @@ subset_profiles %>%
   coord_flip()
 
 ```
+
+A basic measure of college value is the cost vs. earnings potential.  We might put many disclaimers on this particular cut of the data but it is interesting to note that Dension is both the high cost and low earnings quadrant.  Quadrants are divided by the median levels.  There we do keep company with Elon.
+
 ```{r net cost vs earnings, echo=FALSE, message=FALSE, warning=FALSE}
 subset_profiles %>%
   ggplot() +
@@ -180,21 +194,44 @@ subset_profiles %>%
        x= "Net Cost",
        caption = "Source: U.S. Dept. of Education")
 ```
-```{r debt by income cohort}
+The picture shifts a bit when we look at debt vs. earnings but Denison is the high relative debt quadrant as well.  
+
+```{r net debt vs earnings, echo=FALSE, message=FALSE, warning=FALSE}
+subset_profiles %>%
+  ggplot() +
+  geom_point(aes(debt,median_adj_earnings)) +
+  #  geom_text(aes(x=1-avg_net_priv/avg_cost,y=pct_white,label = college)) +
+  ggrepel::geom_text_repel(aes(x=debt,y=median_adj_earnings,label = college)) +
+  scale_y_continuous(label=scales::dollar) +
+  scale_x_continuous(label=scales::dollar) +
+  geom_vline(xintercept=median(subset_profiles$debt)) +
+  geom_hline(yintercept=median(subset_profiles$median_adj_earnings)) +
+  annotate(geom = "text",x = 13500,y=52000,label="Better Value",size=5, color="darkgreen") +
+  annotate(geom = "text",x = 24000,y=29000,label="Worse Value",size=5,color="red") +
+  labs(title= "Debt at Graduation vs. Earnings Two Years after Graduation",
+       subtitle = "Earnings Adjusted to Only Include Majors Offered at Denison",
+       y = "Adjusted Earnings",
+       x= "Debt",
+       caption = "Source: U.S. Dept. of Education")
+
+```
+
+
+```{r debt by income cohort, message=FALSE, warning=FALSE}
 subset_profiles %>%
   ggplot() +
   geom_col(aes(reorder(college,debt_low_income),debt),fill="orange") +
   geom_col(aes(reorder(college,debt_low_income),debt_low_income),fill="red") +
   scale_y_continuous(label=scales::dollar) +
-  labs(title= "Debt Principal for All and Low-Income-Family Graduates",
+  labs(title= "Debt Principal for All and Low-Income Family Graduates",
        y = "",
        x= "",
        subtitle = "Red is Debt of Low Income Students",
        caption = "Source: U.S. Dept. of Education") +
   coord_flip()
-}
 
 ```
+
 
 ```{r racial makeup, echo=FALSE}
 subset_profiles %>%
