@@ -17,7 +17,7 @@ The charts below are an exploration of the data available from the U.S. Dept. of
 
 This survey includes our peer schools plus Elon, a school which Adam Weinberg mentions frequently.  Elon is three times the size of Denison and is an outlier in several other ways as we shall see.
 
-The basic questions I am looking at are the relationship of college cost, student debt and future earnings.  My motivation is to understand how we set Denison students up for success relative to our peer schools.  Success is not necessarily measured only by the data available from the DOE but it is a useful starting point.
+The basic questions I am looking at are the relationship of college cost, student debt and future earnings.  My motivation is to understand how we set Denison students up for success relative to our peer schools.  Success is not necessarily measured only by the data available from the DOE but it is a useful starting point. [This article in the WSJ](https://www.wsj.com/articles/financially-hobbled-for-life-the-elite-masters-degrees-that-dont-pay-off-11625752773) about the value of graduate degrees piqued my interest and alterted me to the data set.  I follow the methodology in the article where data for 2019 graduates is the most recent available and I use debt levels for the 2017 graduating class to match up with the 2019 earnings two years later.
 
 The DOE data includes earnings and debt data by major. Where there is sufficient data and both Denison and the peer school have the majors I include them.  Where I look at aggregate earnings, I adjust for those majors common to both schools. In practice, this means my "adjusted earnings" for schools with, say, engineering degrees remove earnings for those majors since they are not offered at Dension. I also take out debt and earnings data for post-graduate programs since Denison does not have a graduate school.
 
@@ -43,6 +43,7 @@ profiles <- raw_score %>% transmute(UNITID,college = INSTNM,
                                   med_fam_income = MD_FAMINC,
                                   middle_income_students = INC_PCT_M1,
                                   debt = DEBT_MDN,
+                                  debt_count = DEBT_N,
                                   debt_low_income = LO_INC_DEBT_MDN,
                                   adm_rate = ADM_RATE,
                                   sat_test_avg = SAT_AVG,
@@ -154,7 +155,8 @@ subset_profiles %>%
   {.}
 ```
 
-The chart below shows gross and net price.  There doesn't seem to be much correlation between the two amounts.  Elon stands out for having a substantially cheaper list price than any of the peer colleges, yet has the highest realized net price.
+
+The chart below shows gross and average net price.  There doesn't seem to be much correlation between the two amounts.  Elon stands out for having a substantially cheaper list price than any of the peer colleges, yet has the highest realized net price.
 
 ```{r gross and net cost, echo=FALSE}
 # ------------------------------------------------
@@ -174,7 +176,7 @@ subset_profiles %>%
 
 ```
 
-A basic measure of college value is the cost vs. earnings potential.  We might put many disclaimers on this particular cut of the data but it is interesting to note that Dension is both the high cost and low earnings quadrant.  Quadrants are divided by the median levels.  There we do keep company with Elon.
+A basic measure of college value is the cost vs. earnings potential.  The plot below is divided into quadrants by median cost and earnings. We might put many disclaimers on this particular cut of the data but it is interesting to note that Denison is in the high cost/low earnings quadrant. There, alas, we do keep company with Elon.
 
 ```{r net cost vs earnings, echo=FALSE, message=FALSE, warning=FALSE}
 subset_profiles %>%
@@ -194,7 +196,7 @@ subset_profiles %>%
        x= "Net Cost",
        caption = "Source: U.S. Dept. of Education")
 ```
-The picture shifts a bit when we look at debt vs. earnings but Denison is the high relative debt quadrant as well.  
+The picture shifts a bit when we look at debt vs. earnings but Denison is also above median in debt principal at graduation as well.  
 
 ```{r net debt vs earnings, echo=FALSE, message=FALSE, warning=FALSE}
 subset_profiles %>%
@@ -215,7 +217,22 @@ subset_profiles %>%
        caption = "Source: U.S. Dept. of Education")
 
 ```
+What fraction of enrolled students take on debt?
 
+```{r}
+subset_profiles %>% 
+  ggplot() +
+  geom_col(aes(reorder(college,debt_count/enrollment),debt_count/enrollment)) +
+  scale_y_continuous(label=scales::percent) +
+  labs(title= "Fraction of Enrolled Students Who Take on Any Debt",
+       y = "",
+       x= "",
+       caption = "Source: U.S. Dept. of Education") +
+  coord_flip()
+
+```
+
+The DOE data breaks out debt by family income cohort.  Denison stands out for graduating students with higher debt than most of our peers and is one of only two peer schools where students from low-income families graduate with debt higher than the average for the school overall.
 
 ```{r debt by income cohort, message=FALSE, warning=FALSE}
 subset_profiles %>%
