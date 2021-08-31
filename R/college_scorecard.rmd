@@ -27,6 +27,7 @@ Looking at the tabular data below, we see that the adjusted earnings come close 
 library(tidyverse)
 library(ggmulti) # for ggplot glyphs
 library(png)
+library(gt)
 
 # load data
 dir_prefix <- "../data/"
@@ -145,16 +146,35 @@ subset_profiles <- profiles %>%
   mutate(college = as.factor(college))
 
 subset_profiles %>%
-  select(college,avg_cost,avg_net_priv,net_cost_low_income_priv,
-         debt,debt_low_income,avg_earnings,avg_adj_earnings) %>%
-  mutate(across(where(is.double),~scales::dollar(.x,trim=FALSE),.names="{.col}")) %>%
-  arrange(avg_cost) %>%
-  kableExtra::kable(
-    col.names = c("School","Gross Price","Net Price","Net Price\n(low inc)",
-                  "Avg Debt","Avg Debt\n(low inc)","Grad Earnings","Grad Earnings(adj)")) %>%
-  {.}
+  arrange(-avg_cost) %>% 
+  select(college,enrollment, avg_cost,avg_net_priv,net_cost_low_income_priv,
+         debt,debt_low_income,avg_earnings,avg_adj_earnings) %>% 
+  gt() %>%
+  tab_header(
+    title = "Denison and Peer Colleges",
+    subtitle = "Source: Denison University and DOE") %>%
+  fmt_number(
+    columns = enrollment,
+    decimals = 0,
+    suffixing = FALSE) %>% 
+  fmt_currency(
+    columns = c( avg_cost,avg_net_priv,net_cost_low_income_priv,
+         debt,debt_low_income,avg_earnings,avg_adj_earnings),
+    decimals = 0,
+    currency = "USD") %>% 
+  tab_style(
+    style = cell_text(style = "italic",size = "small"),
+    locations = cells_body()) %>% 
+  cols_label(college = "College",
+             enrollment = "Students",
+             avg_cost = "Price",
+             avg_net_priv = "Net Price",
+             net_cost_low_income_priv = "Net Px Low Inc",
+             debt = "Debt",
+             debt_low_income = "Debt Low Inc",
+             avg_earnings = "Earnings",
+             avg_adj_earnings = "Adj Earnings")
 ```
-
 
 The chart below shows gross and average net price.  There doesn't seem to be much correlation between the two amounts.  Elon stands out for having a substantially cheaper list price than any of the peer colleges, yet has the highest realized net price.
 
@@ -249,6 +269,7 @@ subset_profiles %>%
 
 ```
 
+It would be interesting to cut the financial data across racial lines but the DOE data set doesn't get that granular. We can still examine the racial makeup of the student body.  All the peer schools have similar numbers of African-American students but they vary widely in the overall fraction of students of color.  Here again, Elon is a standout.  It is a very white school.
 
 ```{r racial makeup, echo=FALSE}
 subset_profiles %>%
