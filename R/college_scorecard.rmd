@@ -3,26 +3,28 @@ title: "Denison Outcomes vs. Peer Colleges"
 author: "Art Steinmetz"
 date: "8/17/2021"
 output:
+  pdf_document: default
   html_notebook:
     df_print: paged
-  pdf_document: default
+classoption: landscape
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+## *_CONFIDENTIAL DRAFT. NOT FOR DISTRIBUTION._*
 
-### Introduction
+## Introduction
 
-The charts below are an exploration of the data available from the U.S. Dept. of Education College Scorecard. The raw data files I used can be found at [data.ed.gov](https://data.ed.gov/dataset/college-scorecard-all-data-files-through-6-2020/resources?resource=ff68afc4-6d23-459d-9f60-4006e4f85583). This is NOT an analysis and no firm conclusions should be drawn from the charts.  The observations I make are drawn simply from looking at the charts and may paint an incomplete or faulty picture due to inaccurate or incomplete data.  There are hundreds of similar fields in the data sets so I may not be taking the most appropriate ones in all cases.  I am new to this data so I may be making other mistakes as well.
+The charts below are an exploration of the data available from the U.S. Dept. of Education College Scorecard. The raw data files I used can be found at ***[data.ed.gov](https://data.ed.gov/dataset/college-scorecard-all-data-files-through-6-2020/resources?resource=ff68afc4-6d23-459d-9f60-4006e4f85583)***. This is NOT an analysis and no firm conclusions should be drawn from the charts.  The observations I make are drawn simply from looking at the charts and may paint an incomplete or faulty picture due to inaccurate or incomplete data.  There are hundreds of similar fields in the data sets so I may not be taking the most appropriate ones in all cases.  I am new to this data so I may be making other mistakes as well. This document is for disucssion only.
 
-This survey includes our peer schools plus Elon, a school which Adam Weinberg mentions frequently.  Elon is three times the size of Denison and is an outlier in several other ways as we shall see.
+This survey includes our "official" peer schools plus Elon, a school which Adam Weinberg mentions frequently.  Elon is three times the size of Denison and is an outlier in several other ways as we shall see.
 
-The basic questions I am looking at are the relationship of college cost, student debt and future earnings.  My motivation is to understand how we set Denison students up for success relative to our peer schools.  Success is not necessarily measured only by the data available from the DOE but it is a useful starting point. [This article in the WSJ](https://www.wsj.com/articles/financially-hobbled-for-life-the-elite-masters-degrees-that-dont-pay-off-11625752773) about the value of graduate degrees piqued my interest and alterted me to the data set.  I follow the methodology in the article where data for 2019 graduates is the most recent available and I use debt levels for the 2017 graduating class to match up with the 2019 earnings two years later.
+The basic questions I am looking at are the relationship of college cost, student debt and future earnings.  My motivation is to understand how we set Denison students up for success relative to our peer schools.  Success is not necessarily measured only by the data available from the DOE but it is a useful starting point. ***[This article in the WSJ](https://www.wsj.com/articles/financially-hobbled-for-life-the-elite-masters-degrees-that-dont-pay-off-11625752773)*** about the value of graduate degrees piqued my interest and alterted me to the data set.  I follow the methodology in the article where data for 2019 graduates is the most recent available and I use debt levels for the 2017 graduating class to match up with the 2019 earnings two years later.
 
 The DOE data includes earnings and debt data by major. Where there is sufficient data and both Denison and the peer school have the majors I include them.  Where I look at aggregate earnings, I adjust for those majors common to both schools. In practice, this means my "adjusted earnings" for schools with, say, engineering degrees remove earnings for those majors since they are not offered at Dension. I also take out debt and earnings data for post-graduate programs since Denison does not have a graduate school.
 
-While the peer profile data provided by the admissions office is up-to-date, I use the 2019 gross and net price data from the DOE data set so I can compare it toe contemporaneous debt and forward earnings data.  These numbers are roughly 10% lower than for the 2122 school year.
+While the peer profile data provided by the admissions office is up-to-date, I use the 2019 gross and net price data from the DOE data set so I can compare it to contemporaneous debt and forward earnings data.  These numbers are roughly 10% lower than for the 2122 school year.
 
 ```{r load, message=FALSE, warning=FALSE, include=FALSE}
 library(tidyverse)
@@ -156,7 +158,8 @@ plot_limits = c(
 highlight_schools = c("Denison")
 subset_highlight = filter(subset_field,college %in% highlight_schools)
 ```
-### Profile Data
+\newpage
+## Profile Data
 
 Looking at the tabular data below, we see that the adjusted earnings come close to raw earnings in most cases, suggesting that the peer schools are well matched in terms of the academic programs offered.
 
@@ -197,7 +200,9 @@ subset_profiles %>%
              avg_earnings = "Earnings",
              avg_adj_earnings = "Adj Earnings")
 ```
-### Net Cost
+\newpage
+
+## Net Cost
 The chart below shows gross and average net price.  There doesn't seem to be much correlation between the two amounts.  Elon stands out for having a substantially cheaper list price than any of the peer colleges, yet has the highest realized net price.
 
 ```{r gross and net cost, echo=FALSE}
@@ -217,8 +222,9 @@ subset_profiles %>%
   coord_flip()
 
 ```
+\newpage
 
-### Cost vs. Earnings
+## Cost vs. Earnings
 A basic measure of college value is the cost vs. earnings potential.  The plot below is divided into quadrants by median cost and earnings. We might put many disclaimers on this particular cut of the data but it is interesting to note that Denison is in the high cost/low earnings quadrant. There, alas, we do keep company with Elon.
 
 ```{r net cost vs earnings, echo=FALSE, message=FALSE, warning=FALSE}
@@ -239,8 +245,9 @@ subset_profiles %>%
        x= "Net Cost",
        caption = "Source: U.S. Dept. of Education")
 ```
+\newpage
 
-### Cost vs. Debt
+## Cost vs. Debt
 The picture shifts a bit when we look at debt vs. earnings but Denison is also above median in debt principal at graduation as well.
 
 ```{r net debt vs earnings, echo=FALSE, message=FALSE, warning=FALSE}
@@ -262,6 +269,7 @@ subset_profiles %>%
        caption = "Source: U.S. Dept. of Education")
 
 ```
+\newpage
 What fraction of enrolled students take on debt?
 
 ```{r}
@@ -276,14 +284,15 @@ subset_profiles %>%
   coord_flip()
 
 ```
+\newpage
 
-The DOE data breaks out debt by family income cohort.  Denison stands out for graduating students with higher debt than most of our peers and is one of only two peer schools where students from low-income families graduate with debt higher than the average for the school overall.
+The DOE data breaks out debt by family income cohort.  Denison stands out for graduating students with higher debt than most of our peers and the only school where students from low-income families graduate with debt higher than the average for the school overall.
 
 ```{r debt by income cohort, message=FALSE, warning=FALSE}
 subset_profiles %>%
   ggplot() +
   geom_col(aes(reorder(college,debt_low_income),debt),fill="orange") +
-  geom_col(aes(reorder(college,debt_low_income),debt_low_income),fill="red") +
+  geom_col(aes(reorder(college,debt_low_income),debt_low_income),fill="red",alpha = 0.6) +
   scale_y_continuous(label=scales::dollar) +
   labs(title= "Debt Principal for All and Low-Income Family Graduates",
        y = "",
@@ -293,6 +302,10 @@ subset_profiles %>%
   coord_flip()
 
 ```
+
+\newpage
+
+## Race
 
 It would be interesting to cut the financial data across racial lines but the DOE data set doesn't get that granular. We can still examine the racial makeup of the student body.  All the peer schools have similar numbers of African-American students but they vary widely in the overall fraction of students of color.  Here again, Elon is a standout.  It is a very white school.
 
@@ -315,7 +328,10 @@ subset_profiles %>%
 
 ```
 
-### Denison Peers vs. All Small Privates
+\newpage
+
+## Denison Peers vs. All Small Privates
+
 As a side note, among all private colleges of similar size (between 1,500 and 3000 students) our peer group is an elite subset with respect to cost.  Our peer group is much more expensive, while graduates have similar levels of debt and earnings.
 
 ```{r}
@@ -334,8 +350,8 @@ compare_subsets %>%
   fmt_currency(columns=c(Net_Cost,Debt,Earnings),
                decimals = 0)
 ```
-
-### Family Income
+\newpage
+## Family Income
 
 There is scant correlation between family income and tuition discounts.  As we saw before, Elon discounts it's tuition much less than our peer colleges AND the median income of its student families is higher than any of our peers.
 
@@ -343,7 +359,8 @@ There is scant correlation between family income and tuition discounts.  As we s
 subset_profiles %>%
   ggplot() +
   geom_point(aes(y=1-avg_net_priv/avg_cost,x=med_fam_income)) +
-  ggrepel::geom_text_repel(aes(y=1-avg_net_priv/avg_cost,x=med_fam_income,label = college)) +
+  ggrepel::geom_text_repel(aes(y=1-avg_net_priv/avg_cost,x=med_fam_income,label = college),
+                           max.overlaps = 12) +
   scale_y_continuous(label=scales::dollar) +
   scale_x_continuous(label=scales::dollar) +
   labs(title= "Tuition Discounts vs. Family Income",
@@ -351,7 +368,7 @@ subset_profiles %>%
        x= "Median Family Income",
        caption = "Source: U.S. Dept. of Education")
 ```
-
+\newpage
 Similarly, there is scant correlation between family income and earnings after graduation.  This is suggestive.  If there was a high correlation between family income and student earnings, we might ascribe causality.  With no correlation it makes a stronger case that the different outcomes are more a function of what the college provides.  I have to emphasize again this is only suggestive.  Much more work would have to be done to draw any conclusions.
 
 ```{r income vs earnings}
@@ -367,7 +384,7 @@ subset_profiles %>%
        caption = "Source: U.S. Dept. of Education")
 
 ```
-
+\newpage
 The full data set shows the same lack of correlation, except at income extremes.
 
 ```{r message=FALSE, warning=FALSE}
@@ -386,12 +403,11 @@ profiles %>%
        caption = "Source: U.S. Dept. of Education")
 
 ```
+\newpage
 
+## Selectivity
 
-
-### Selectivity
-
-A test-based selectivity measure becomes more problematic as more schools eschew SAT/ACT requirements. Still, a correlation between selectivity and reported test scores exists. Elon is the least selective. Denison is among the most selective of our peer colleges.  This represents brand equity.  Does it offer an opportunity to leverage it to increase our metrics in areas we underperform?
+A test-based selectivity measure becomes more problematic as more schools eschew SAT/ACT requirements. Still, a correlation between selectivity and reported test scores exists. A lower admission rate is more selective. Elon is the least selective. Denison is among the most selective of our peer colleges.  This represents brand equity.  Does it offer an opportunity to leverage it to increase our metrics in areas we underperform?
 
 ```{r selectivity, message=FALSE, warning=FALSE}
 subset_profiles %>%
@@ -408,7 +424,9 @@ subset_profiles %>%
        caption = "Source: U.S. Dept. of Education")
 
 ```
-### Looking at Data Down To The Concentration Level
+\newpage
+
+## Looking at Data Down To The Concentration Level
 
 In the plots below, each dot represents one concentration at one school.  Concentrations not offered by Denison or where there is insufficient data to be reported are not included.
 
@@ -447,6 +465,7 @@ subset_field %>%
 
 
 ```
+\newpage
 Now look at the debt by concentration.  The points do not lie on a straight line this time because the DOE provides debt levels by concentration.  This is essentially the analysis done by the "Wall Street Journal" mentioned at the beginning of this survey.  The dashed line represents equivalency between earnings two years after graduation and debt principal at graduation. The only Denison major where debt exceeds earnings is Sociology.
 
 
@@ -467,19 +486,19 @@ subset_field %>%
        x = "Earnings Two Years After Graduation",
        caption = "Source: U.S. Dept. of Education") +
   #  geom_point(data=subset_highlight,size = 5,color = "red") +
-  geom_text(data=subset_highlight,label = "DU",color = "red") +
-  # geom_image_glyph(data=subset_highlight,
-  #                  mapping = aes(x = debt, y = earnings),
-  #                  imagewidth = 0.5,
-  #                  imageheight = 0.5,
-  #                  colour = NA,
-  #                  interpolate = TRUE,
-  #                  images=d_glyph) +
+  # geom_text(data=subset_highlight,label = "DU",color = "red") +
+  geom_image_glyph(data=subset_highlight,
+                   mapping = aes(x = earnings, y = debt),
+                   imagewidth = 0.5,
+                   imageheight = 0.5,
+                   colour = NA,
+                   interpolate = TRUE,
+                   images=d_glyph) +
   theme(legend.position = "none")
 
 ```
-
-Now let's aggregate the data by concentration and summarize into quartiles.  Denison concentrations are in the bottom quartile of earnings in several areas and in the top quartile in only one, History.  Oddly, none of our peer colleges show data in the Ethnic or Gender studies categories.
+\newpage
+Now let's aggregate the data by concentration and summarize into quartiles.  Denison concentrations are in the bottom quartile of earnings in several areas and in the top quartile in only one, History.  Oddly, none of our peer colleges show data in the Ethnic or Gender studies categories. Is Denison more "woke" than our peers?
 
 ```{r earnings by major}
 # Earnings
@@ -494,18 +513,18 @@ Now let's aggregate the data by concentration and summarize into quartiles.  Den
        y="Median Earnings 2 Years After Graduation",
        x= "Concentration",
        caption = "Source: U.S. Dept. of Education") +
-  geom_text(data=subset_highlight,label = "DU",color = "red") +
-  # geom_image_glyph(data=subset_highlight,
-  #                  mapping = aes(x = debt, y = earnings),
-  #                  imagewidth = 0.5,
-  #                  imageheight = 0.5,
-  #                  colour = NA,
-  #                  interpolate = TRUE,
-  #                  images=d_glyph) +
+#  geom_text(data=subset_highlight,label = "DU",color = "red") +
+  geom_image_glyph(data=subset_highlight,
+                   mapping = aes(x = concentration, y = earnings),
+                   imagewidth = 0.5,
+                   imageheight = 0.5,
+                   colour = NA,
+                   interpolate = TRUE,
+                   images=d_glyph) +
   theme(legend.position = "none")
 
 ```
-
+\newpage
 Turning to debt, as we saw in the aggregates above, Denison produces graduates with more debt than most of our peers but this is driven by a few concentrations. We are close to median in many. Denison is the big outlier in Psychology
 
 ```{r debt, echo=FALSE}
@@ -521,16 +540,17 @@ subset_field %>%
        y="Debt At Time Of Graduation",
        x= "Concentration",
        caption = "Source: U.S. Dept. of Education") +
-  geom_text(data=subset_highlight,label = "DU",color = "red") +
-  # geom_image_glyph(data=subset_highlight,
-  #                  mapping = aes(x = debt, y = earnings),
-  #                  imagewidth = 0.5,
-  #                  imageheight = 0.5,
-  #                  colour = NA,
-  #                  interpolate = TRUE,
-  #                  images=d_glyph) +
+ # geom_text(data=subset_highlight,label = "DU",color = "red") +
+  geom_image_glyph(data=subset_highlight,
+                   mapping = aes(x = concentration, y = debt),
+                   imagewidth = 0.5,
+                   imageheight = 0.5,
+                   colour = NA,
+                   interpolate = TRUE,
+                   images=d_glyph) +
   theme(legend.position = "none")
 ```
+\newpage
 As we combine earnings and debt into a ratio we see, as expected, worse outcomes for Denison majors than many of our peers.
 
 ```{r earnings-debt ratio, echo=FALSE}
@@ -544,17 +564,26 @@ subset_field %>%
        y="Ratio of Earnings in 2019 to Debt in 2017",
        x= "Concentration",
        caption = "Source: U.S. Dept. of Education") +
-  geom_text(data=subset_highlight,label = "DU",color = "red") +
-  # geom_image_glyph(data=subset_highlight,
-  #                  mapping = aes(x = debt, y = earnings),
-  #                  imagewidth = 0.5,
-  #                  imageheight = 0.5,
-  #                  colour = NA,
-  #                  interpolate = TRUE,
-  #                  images=d_glyph) +
+ # geom_text(data=subset_highlight,label = "DU",color = "red") +
+  geom_image_glyph(data=subset_highlight,
+                   mapping = aes(x = concentration, y = debt_ratio),
+                   imagewidth = 0.5,
+                   imageheight = 0.5,
+                   colour = NA,
+                   interpolate = TRUE,
+                   images=d_glyph) +
   coord_flip()
 
 ```
-### Final Thoughts
+\newpage
+
+## Final Thoughts
 
 While some of the numbers presented above look discouraging it must be remembered that all the numbers fall within a narrow range and all our peers are quite similar across the board.  There are a lot of quality metrics that don't get captured by the DOE data set.  Obviously, as Denison's low admission rate attests, Denison is a very desirable school. Still, there may be work to do.  Finally, refer back to all the disclaimers I mentioned at the outset.  This is a survey, not an analysis, and my selection of data may not be the best.
+
+-- Art Steinmetz
+
+## Reproducibility
+
+Code and data sets are at ***[https://github.com/apsteinmetz/college_scorecard.git](https://github.com/apsteinmetz/college_scorecard.git)***
+
