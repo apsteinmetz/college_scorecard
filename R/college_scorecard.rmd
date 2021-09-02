@@ -209,8 +209,6 @@ The chart below shows gross and average net price.  There doesn't seem to be muc
 # ------------------------------------------------
 # profile plots
 subset_profiles %>%
-  # pivot_longer(c(avg_cost,avg_net_priv,net_cost_low_income_priv),names_to = "cost_type",values_to = "amount") %>%
-  # group_by(college) %>%
   ggplot() +
   geom_col(aes(reorder(college,avg_net_priv),avg_cost),fill="blue") +
   geom_col(aes(reorder(college,avg_net_priv),avg_net_priv)) +
@@ -254,7 +252,6 @@ The picture shifts a bit when we look at debt vs. earnings but Denison is also a
 subset_profiles %>%
   ggplot() +
   geom_point(aes(debt,median_adj_earnings)) +
-  #  geom_text(aes(x=1-avg_net_priv/avg_cost,y=pct_white,label = college)) +
   ggrepel::geom_text_repel(aes(x=debt,y=median_adj_earnings,label = college)) +
   scale_y_continuous(label=scales::dollar) +
   scale_x_continuous(label=scales::dollar) +
@@ -361,7 +358,7 @@ subset_profiles %>%
   geom_point(aes(y=1-avg_net_priv/avg_cost,x=med_fam_income)) +
   ggrepel::geom_text_repel(aes(y=1-avg_net_priv/avg_cost,x=med_fam_income,label = college),
                            max.overlaps = 12) +
-  scale_y_continuous(label=scales::dollar) +
+  scale_y_continuous(label=scales::percent_format(accuracy = 1)) +
   scale_x_continuous(label=scales::dollar) +
   labs(title= "Tuition Discounts vs. Family Income",
        y = "Tuition Discount",
@@ -369,7 +366,7 @@ subset_profiles %>%
        caption = "Source: U.S. Dept. of Education")
 ```
 \newpage
-Similarly, there is scant correlation between family income and earnings after graduation.  This is suggestive.  If there was a high correlation between family income and student earnings, we might ascribe causality.  With no correlation it makes a stronger case that the different outcomes are more a function of what the college provides.  I have to emphasize again this is only suggestive.  Much more work would have to be done to draw any conclusions.
+Similarly, there is scant correlation between family income and earnings after graduation.  This is suggestive.  If there was a high correlation between family income and student earnings, we might ascribe causality.  With no correlation it makes a stronger case that the different outcomes are more a function of what the college provides.  I have to emphasize again this is only suggestive.  Much more work would have to be done to draw any conclusions.  We can't say what explains the differences. We CAN say family income does not.
 
 ```{r income vs earnings}
 subset_profiles %>%
@@ -385,7 +382,7 @@ subset_profiles %>%
 
 ```
 \newpage
-The full data set shows the same lack of correlation, except at income extremes.
+The full DOE data set, including all public and private schools with more than 1000 students, shows the same lack of correlation, except at income extremes.
 
 ```{r message=FALSE, warning=FALSE}
 profiles %>%
@@ -433,14 +430,20 @@ In the plots below, each dot represents one concentration at one school.  Concen
 First we look at the distribution of earnings by major, by school, sorted by full price.  Denison majors are tilted toward the lower end of earnings. The outlier on the high end at Denison, as you might expect, is economics.
 
 
-```{r price vs earnings by major, echo=FALSE}
+```{r price vs earnings by major, echo=FALSE, fig.width=9}
 
 
 # subset_field %>% select(college,comp_fee_2122,comp_fee_2021,avg_cost)
 
 # Earnings
+
+label_points = subset_field %>% 
+  group_by(college) %>% 
+  # min(avg_cost) is superfluous
+  summarise(x = min(avg_cost),y = min(earnings))
+
 subset_field %>%
-  ggplot(aes(avg_cost,earnings,color= college)) +
+  ggplot(aes(x=avg_cost,y=earnings,color= college)) +
   geom_point() +
   geom_line() +
   scale_x_continuous(label=scales::dollar) +
@@ -450,18 +453,11 @@ subset_field %>%
        x= "Full Price",
        y = "Earnings Two Years After Graduation",
        caption = "Source: U.S. Dept. of Education") +
-  #  geom_point(data=subset_highlight,size = 5,color = "red") +
-  #  geom_text(data=subset_highlight,label = "DU",color = "red") +
-  # geom_image_glyph(data=subset_highlight,
-  #                  mapping = aes(x = debt, y = earnings),
-  #                  imagewidth = 0.5,
-  #                  imageheight = 0.5,
-  #                  colour = NA,
-  #                  interpolate = TRUE,
-  #                  images=d_glyph) +
-  geom_text(aes(avg_cost,10000,label=college),color="black",angle=0,alpha = 0.2) +
-  theme(legend.position = "none") +
-  coord_flip()
+  # geom_text(aes(x=avg_cost,y=10000,label=college),color="black",angle=90,alpha = 1, size = 3) +
+  ggrepel::geom_text_repel(aes(x=x,y=y,label=college),
+                           data = label_points,
+                           angle=90,alpha = 1, color = "black", size = 3,max.overlaps = 20) +
+  theme(legend.position = "none")
 
 
 ```
@@ -472,23 +468,23 @@ Now look at the debt by concentration.  The points do not lie on a straight line
 ```{r debt vs earnings by major}
 # debt
 subset_field %>%
-  ggplot(aes(earnings,debt,color=college,label=concentration)) +
+  ggplot(aes(y=earnings,x=debt,color=college,label=concentration)) +
   geom_point() +
   #  geom_text() +
-  geom_abline(slope = 1,intercept = 0,linetype="dashed") +
-  #  scale_x_continuous(limits=plot_limits,label=scales::dollar) +
-  #  scale_y_continuous(limits=plot_limits,label=scales::dollar) +
+  geom_abline(slope = 1,intercept = 0,linetype="dashed",size = 1) +
   scale_x_continuous(label=scales::dollar) +
   scale_y_continuous(label=scales::dollar) +
+  annotate(geom = "text",x = 13000,y=75000,label="Lower Debt Burden",size=5, color="darkgreen") +
+  annotate(geom = "text",x = 23000,y=15000,label="Higher Debt Burden",size=5,color="red") +
+
   labs(title = "College Earnings vs. Debt by Concentration",
        subtitle = "Only Concentrations at Peer Colleges\nWith Sufficient Data and Offered at Denison",
-       y = "Debt at Graduation",
-       x = "Earnings Two Years After Graduation",
+       x = "Debt at Graduation",
+       y = "Earnings Two Years After Graduation",
        caption = "Source: U.S. Dept. of Education") +
-  #  geom_point(data=subset_highlight,size = 5,color = "red") +
   # geom_text(data=subset_highlight,label = "DU",color = "red") +
   geom_image_glyph(data=subset_highlight,
-                   mapping = aes(x = earnings, y = debt),
+                   mapping = aes(y = earnings, x = debt),
                    imagewidth = 0.5,
                    imageheight = 0.5,
                    colour = NA,
@@ -500,7 +496,7 @@ subset_field %>%
 \newpage
 Now let's aggregate the data by concentration and summarize into quartiles.  Denison concentrations are in the bottom quartile of earnings in several areas and in the top quartile in only one, History.  Oddly, none of our peer colleges show data in the Ethnic or Gender studies categories. Is Denison more "woke" than our peers?
 
-```{r earnings by major}
+```{r earnings by major, fig.width=9}
 # Earnings
  subset_field %>%
   ggplot(aes(concentration,earnings)) +
@@ -508,7 +504,7 @@ Now let's aggregate the data by concentration and summarize into quartiles.  Den
   geom_point() +
   geom_boxplot() +
   coord_flip() +
-  labs(title = "Earnings for 2017 Graduates by Concentration",
+  labs(title = "Earnings for 2017 Graduates",
        subtitle = "Only Concentrations at Peer Colleges\nWith Sufficient Data and Offered at Denison",
        y="Median Earnings 2 Years After Graduation",
        x= "Concentration",
@@ -527,7 +523,7 @@ Now let's aggregate the data by concentration and summarize into quartiles.  Den
 \newpage
 Turning to debt, as we saw in the aggregates above, Denison produces graduates with more debt than most of our peers but this is driven by a few concentrations. We are close to median in many. Denison is the big outlier in Psychology
 
-```{r debt, echo=FALSE}
+```{r debt, echo=FALSE, fig.width=9}
 # Debt
 subset_field %>%
   ggplot(aes(concentration,debt)) +
@@ -553,7 +549,7 @@ subset_field %>%
 \newpage
 As we combine earnings and debt into a ratio we see, as expected, worse outcomes for Denison majors than many of our peers.
 
-```{r earnings-debt ratio, echo=FALSE}
+```{r earnings-debt ratio, echo=FALSE, fig.width=9}
 # Earnings/Debt Ratiosubset_field %>%
 subset_field %>%
   ggplot(aes(concentration,debt_ratio)) +
