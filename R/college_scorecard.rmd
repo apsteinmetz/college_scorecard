@@ -35,60 +35,86 @@ library(gt)
 # load data
 dir_prefix <- "../data/"
 raw_score <- read_csv(paste0(dir_prefix,"Most-Recent-Cohorts-All-Data-Elements.csv"))
-profiles <- raw_score %>% transmute(UNITID,college = INSTNM,
-                                  type = SCHTYPE,
-                                  enrollment = UGDS,
-                                  avg_net_priv = NPT4_PRIV,
-                                  avg_net_pub = NPT4_PUB,
-                                  avg_net_other = NPT4_PROG,
-                                  avg_cost = COSTT4_A,
-                                  net_cost_low_income_priv = NPT41_PRIV,
-                                  net_cost_low_income_pub = NPT41_PUB,
-                                  med_fam_income = MD_FAMINC,
-                                  middle_income_students = INC_PCT_M1,
-                                  debt = DEBT_MDN,
-                                  debt_count = DEBT_N,
-                                  debt_low_income = LO_INC_DEBT_MDN,
-                                  adm_rate = ADM_RATE,
-                                  sat_test_avg = SAT_AVG,
-                                  act_test_mid = ACTMTMID,
-                                  pct_white = UGDS_WHITE,
-                                  pct_black = UGDS_BLACK,
-                                  completion_rate_white = C150_4_WHITE,
-                                  completion_rate_black = C150_4_BLACK) %>%
-  mutate(type=fct_recode(as.factor(type),public="1",private="2",for_profit="3",unspecified="NULL"))
-profiles <- profiles %>% mutate(across(4:ncol(profiles),as.numeric))
+profiles <- raw_score %>% transmute(
+  UNITID = as.character(UNITID),
+  college = INSTNM,
+  type = SCHTYPE,
+  enrollment = UGDS,
+  avg_net_priv = NPT4_PRIV,
+  avg_net_pub = NPT4_PUB,
+  avg_net_other = NPT4_PROG,
+  avg_cost = COSTT4_A,
+  net_cost_low_income_priv = NPT41_PRIV,
+  net_cost_low_income_pub = NPT41_PUB,
+  med_fam_income = MD_FAMINC,
+  middle_income_students = INC_PCT_M1,
+  debt = DEBT_MDN,
+  debt_count = DEBT_N,
+  debt_low_income = LO_INC_DEBT_MDN,
+  adm_rate = ADM_RATE,
+  sat_test_avg = SAT_AVG,
+  act_test_mid = ACTMTMID,
+  pct_white = UGDS_WHITE,
+  pct_black = UGDS_BLACK,
+  completion_rate_white = C150_4_WHITE,
+  completion_rate_black = C150_4_BLACK
+) %>%
+  mutate(type = fct_recode(
+    as.factor(type),
+    public = "1",
+    private = "2",
+    for_profit = "3",
+    unspecified = "NULL"
+  ))
+profiles <- profiles %>% mutate(across(4:ncol(profiles), as.numeric))
 
-#data source: https://data.ed.gov/dataset/college-scorecard-all-data-files-through-6-2020/resources
-raw_majors_current <- read_csv(paste0(dir_prefix,"Most-Recent-Cohorts-Field-of-Study.csv"))
+#data source: https://data.ed.gov/dataset/college-scorecard-all-data-files/resources
+raw_majors_current <-
+  read_csv(paste0(dir_prefix, "Most-Recent-Cohorts-Field-of-Study.csv"))
 
-raw_majors_2years_ago <- read_csv(paste0(dir_prefix,"FieldOfStudyData1415_1516_PP.csv"))
+raw_majors_2years_ago <-
+  read_csv(paste0(dir_prefix, "FieldOfStudyData1415_1516_PP.csv"))
 
-peers_finance <- read_csv(paste0(dir_prefix,"peer list finance.csv"))
-peers_kb <- read_csv(paste0(dir_prefix,"peer list kb.csv"))
+peers_finance <-
+  read_csv(paste0(dir_prefix, "peer list finance.csv"))
+peers_kb <- read_csv(paste0(dir_prefix, "peer list kb.csv"))
 d_glpyh_file <- "../images/denison-big-red-athletics-no-ribbon.png"
 d_glyph <- png::readPNG(d_glpyh_file)
 
 majors_current <- raw_majors_current %>%
-  select(UNITID,INSTNM,CIPDESC,CIPCODE,CREDLEV,CREDDESC,EARN_MDN_HI_2YR) %>%
-  filter(str_detect(EARN_MDN_HI_2YR,"Privacy",negate = TRUE)) %>%
+  select(UNITID,
+         INSTNM,
+         CIPDESC,
+         CIPCODE,
+         CREDLEV,
+         CREDDESC,
+         EARN_MDN_HI_2YR) %>%
+  filter(str_detect(EARN_MDN_HI_2YR, "Privacy", negate = TRUE)) %>%
   mutate(EARN_MDN_HI_2YR = as.numeric(EARN_MDN_HI_2YR))
 
 majors_2years_ago <- raw_majors_2years_ago %>%
-  select(UNITID,INSTNM,CIPDESC,CIPCODE,CREDLEV,CREDDESC,DEBT_ALL_STGP_EVAL_MDN) %>%
-  filter(str_detect(DEBT_ALL_STGP_EVAL_MDN,"Privacy",negate = TRUE)) %>%
+  select(UNITID,
+         INSTNM,
+         CIPDESC,
+         CIPCODE,
+         CREDLEV,
+         CREDDESC,
+         DEBT_ALL_STGP_EVAL_MDN) %>%
+  filter(str_detect(DEBT_ALL_STGP_EVAL_MDN, "Privacy", negate = TRUE)) %>%
   mutate(DEBT_ALL_STGP_EVAL_MDN = as.numeric(DEBT_ALL_STGP_EVAL_MDN))
 
 # Join to get debt at time of graduation and earnings two-years later for the same people
-debt_vs_earnings <- inner_join(majors_2years_ago,majors_current) %>%
-  mutate(CREDDESC = fct_reorder(as_factor(CREDDESC),CREDLEV)) %>%
-  mutate(debt_ratio = EARN_MDN_HI_2YR/DEBT_ALL_STGP_EVAL_MDN) %>%
+debt_vs_earnings <- inner_join(majors_2years_ago, majors_current) %>%
+  mutate(CREDDESC = fct_reorder(as_factor(CREDDESC), CREDLEV)) %>%
+  mutate(debt_ratio = EARN_MDN_HI_2YR / DEBT_ALL_STGP_EVAL_MDN) %>%
   mutate(CIPDESC = as.factor(CIPDESC)) %>%
-  rename(college = INSTNM,
-         concentration = CIPDESC,
-         earnings=EARN_MDN_HI_2YR,
-         debt=DEBT_ALL_STGP_EVAL_MDN,
-         degree=CREDDESC)
+  rename(
+    college = INSTNM,
+    concentration = CIPDESC,
+    earnings = EARN_MDN_HI_2YR,
+    debt = DEBT_ALL_STGP_EVAL_MDN,
+    degree = CREDDESC
+  )
 
 denison_majors <- debt_vs_earnings %>%
   filter(college == "Denison University") %>%
@@ -97,63 +123,67 @@ denison_majors <- debt_vs_earnings %>%
   as.character()
 
 agg_earnings <- debt_vs_earnings %>%
-  filter(CREDLEV == 3) %>% 
-  group_by(college) %>% 
-  summarize(avg_earnings=mean(earnings),median_earnings = median(earnings)) %>% 
-  mutate(across(where(is.double),round))
+  filter(CREDLEV == 3) %>%
+  group_by(college) %>%
+  summarize(avg_earnings = mean(earnings),
+            median_earnings = median(earnings)) %>%
+  mutate(across(where(is.double), round))
 
 # earnings calculated only from majors that Denison offers
 agg_adj_earnings <- debt_vs_earnings %>%
-  filter(CREDLEV == 3) %>% 
+  filter(CREDLEV == 3) %>%
   filter(concentration %in% denison_majors) %>%
-  group_by(college) %>% 
-  summarize(avg_adj_earnings=mean(earnings),median_adj_earnings = median(earnings)) %>% 
-  mutate(across(where(is.double),round))
+  group_by(college) %>%
+  summarize(avg_adj_earnings = mean(earnings),
+            median_adj_earnings = median(earnings)) %>%
+  mutate(across(where(is.double), round))
 
 # add Elon to peers
-colleges = c(peers_finance$college,"Elon University")
-elon_cost = profiles %>% filter(college=="Elon University") %>% pull(avg_cost)
+colleges = c(peers_finance$college, "Elon University")
+elon_cost = profiles %>% filter(college == "Elon University") %>% pull(avg_cost)
 
 
 subset_profiles <- profiles %>%
   filter(college %in% colleges) %>%
-  left_join(agg_earnings,by="college") %>% 
-  left_join(agg_adj_earnings,by="college") %>% 
+  left_join(agg_earnings, by = "college") %>%
+  left_join(agg_adj_earnings, by = "college") %>%
   select(!contains("pub")) %>%
   select(!contains("other")) %>%
-  mutate(college = str_remove(college," College| University")) %>%
-  mutate(college = str_remove(college,"The of ")) %>%
+  mutate(college = str_remove(college, " College| University")) %>%
+  mutate(college = str_remove(college, "The of ")) %>%
   mutate(college = as.factor(college))
 
-subset_private_profiles <- profiles %>% 
-  left_join(agg_earnings,by="college") %>% 
-  filter( enrollment > 1000, enrollment < 3000) %>% 
+subset_private_profiles <- profiles %>%
+  left_join(agg_earnings, by = "college") %>%
+  filter(enrollment > 1000, enrollment < 3000) %>%
   filter(type == "private")
 
-median_cost <- subset_private_profiles$avg_net_priv %>% median(na.rm = TRUE)
+median_cost <-
+  subset_private_profiles$avg_net_priv %>% median(na.rm = TRUE)
 median_debt <- subset_private_profiles$debt %>% median(na.rm = TRUE)
-median_earn <- subset_private_profiles$avg_earnings %>% median(na.rm = TRUE)
-median_enroll <- subset_private_profiles$enrollment %>% median(na.rm = TRUE)
+median_earn <-
+  subset_private_profiles$avg_earnings %>% median(na.rm = TRUE)
+median_enroll <-
+  subset_private_profiles$enrollment %>% median(na.rm = TRUE)
 
 subset_field_all_majors <- debt_vs_earnings %>%
   filter(college %in% colleges) %>%
   left_join(peers_finance) %>%
   filter(CREDLEV == 3) %>%  #Bachelors
-  mutate(college = str_remove(college," College| University")) %>%
-  mutate(college = str_remove(college,"The of ")) %>% 
-  mutate(comp_fee_2122=ifelse(college=="Elon",elon_cost,comp_fee_2122)) %>% 
-  left_join(subset_profiles,by=c("UNITID","college")) %>% 
-  select(-debt.y) %>% 
+  mutate(college = str_remove(college, " College| University")) %>%
+  mutate(college = str_remove(college, "The of ")) %>%
+  mutate(comp_fee_2122 = ifelse(college == "Elon", elon_cost, comp_fee_2122)) %>%
+  left_join(subset_profiles, by = c("UNITID", "college")) %>%
+  select(-debt.y) %>%
   rename(debt = debt.x)
 
 subset_field <- subset_field_all_majors %>%
   filter(concentration %in% denison_majors)
 
 plot_limits = c(
-  min(subset_field$debt,subset_field$earnings),
-  max(subset_field$debt,subset_field$earnings)
+  min(subset_field$debt, subset_field$earnings),
+  max(subset_field$debt, subset_field$earnings)
 )
-
 # Choose highlight schools in plots
 highlight_schools = c("Denison")
 subset_highlight = filter(subset_field,college %in% highlight_schools)
