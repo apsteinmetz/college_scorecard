@@ -1,0 +1,71 @@
+---
+title: "Metrics That Matter?"
+format: 
+  revealjs:
+    logo: "images/denison_logo.png"
+    background-image: "../images/denison_seal.png"
+editor: visual
+---
+
+## Two Big Gaps
+
+```{r}
+#| include: false
+library(tidyverse)
+library(denisonbrand)
+load_fonts()
+```
+
+Irrespective of what rankings people look at or don't, the DOE data shows two performance outliers.
+
+-   Graduation Rate
+-   Financial Outcomes
+
+## Three Schools In The WSJ Rubric
+
+### Denison, Colgate, Elon
+
+## Do We Choose
+
+### Or Do We Rationalize (1) ?
+
+-   Middle class demographics
+    -   We cite that as a "diversity" strength.
+    -   Is that a deliberate policy or an incidental outcome of our localized applicant pool?
+    -   Would the college be stronger if we shrank the middle?
+
+## Middle Income Students Replace Full Pay At Denison
+
+```{r}
+econ_diversity <- read_csv("../data/econ_diversity.csv") |> 
+  select(College,pell,middle,no_need) |>
+  mutate(College = fct_reorder(College,middle))
+
+
+econ_diversity |> 
+  pivot_longer(cols = c(pell,middle,no_need)) |>
+  mutate(name = as_factor(name)) |> 
+  ggplot(aes(x = College,y = value,fill = name)) +
+  geom_col() +
+  theme_den() +
+  scale_fill_den() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  coord_flip() +
+  labs(title = "Economic Diversity",
+       subtitle="Ordered by Fraction of Middle Income Students",x = NULL,y = NULL)
+```
+
+## Peer Schools
+
+![](images/econ_diversity.png)
+
+## Do We Choose
+
+### Or Do We Rationalize (2) ?
+
+-   Financial Outcomes
+    -   Do our students choose lower paying careers than those at other schools?
+    -   Do our majors align with lower paying careers?
+    -   Does our location feed students back into a lower cost-of-living/salary region?
+    -   Is our career development effective?
+    -   Will the efforts we've made recently pay off in the future?

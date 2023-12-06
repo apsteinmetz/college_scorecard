@@ -1,0 +1,13 @@
+factor,unit,Colgate,Denison,Elon
+location,geo,"Hamilton, NY","Granville, OH","Elon, NC"
+score,score,79.6,54.6,64
+rank,rank,40,317,232
+salary_impact,score,94,54,75
+graduation_rate,score,74,59,80
+years_to_pay,time,1.6,3.7,3.8
+learning,score,71,71,69
+career_prep,score,69,64,72
+facilities,score,86,84,82
+diversity,score,35,47,34
+net_price,money,"$24,489","$32,002","$39,437"
+value_add,money,"$60,737","$34,673","$41,617"
