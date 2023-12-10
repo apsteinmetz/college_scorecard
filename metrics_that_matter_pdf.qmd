@@ -1,0 +1,103 @@
+---
+title: "Metrics That Matter?"
+author: "Art Steinmetz"
+format: typst
+editor: visual
+---
+
+## Two Big Gaps
+
+```{r}
+#| include: false
+library(tidyverse)
+library(denisonbrand)
+library(ggradar)
+load_fonts()
+```
+
+Irrespective of what rankings people look at or don't, the DOE data shows two performance outliers where Denison falls short.
+
+-   Graduation Rate
+-   Financial Outcomes
+
+To what extent are these a consequence of deliberate choices Denison has made or have we rationalized the outcomes?
+
+## A Tale of Three Schools
+
+To illustrate the issue, I took a look at two schools which we have cited as aspirational peers, Colgate and Elon, although they are aspirational in different ways. Denison aspires to the academic reputation of Colgate and to the broad geographic reach of Elon.
+
+I used WSJ/Pulse rankings to highlight the metrics. In the chart below, salary impact and graduation rate calculated while the other variables are survey results. All are normalized. We see that "salary impact" and graduation rate bring down the aggregate ranking for Denison. We look worse than both Colgate and Elon.  It's worth noting that the salary impact is based on the improvement in salary over what would be expected based on the demographics of the student body and the median income for the state the school is located in. This makes Colgate's results more impressive since New York state has a significantly higher median income than both Ohio and North Carolina (which are about 10k/year less). Elon's salary impact is boosted by having a much lower net price that comes at the expense of diversity. Diversity is the only factor where Denison comes out as clearly superior. We may also speculate that Elon's salary impact is boosted by its geographic reach since more of its students return to higher income states after graduation than is true for Denison.
+
+{{< pagebreak >}}
+## A Tale of Three Schools
+```{r}
+#| echo: false
+#| fig.height: 6
+transpose_df <- function(df){
+  df |> 
+    pivot_longer(-1) |> 
+    pivot_wider(names_from = 1,values_from = value)
+}
+
+three_schools <- read_csv("data/three_schools.csv",show_col_types = FALSE)
+
+three_schools |> 
+  filter(unit =="score") |> 
+  select(-unit) |> 
+  mutate(across(2:4,as.numeric)) |> 
+  transpose_df()|> 
+  ggradar(grid.max = 100,grid.mid=50,
+          legend.position = "top",
+          axis.label.size = 5,
+#          legend.text.size = 20,
+          font.radar = den_fonts["den_display_sans"])
+
+```
+
+{{< pagebreak >}}
+## Demographics: Did We Choose
+
+### Or Did We Rationalize?
+
+-   Middle class demographics
+    -   We cite "economic diversity" as a strength.
+    -   Is that a deliberate policy or an incidental outcome of our localized applicant pool?
+    -   Would the college be stronger if we shrank the middle?
+
+### Middle Income Students Replace Full Pay At Denison
+
+```{r}
+#| echo: false
+#| fig-height: 5
+econ_diversity <- read_csv("data/econ_diversity.csv",show_col_types = FALSE) |> 
+  select(College,pell,middle,no_need) |>
+  mutate(College = fct_reorder(College,middle))
+
+
+econ_diversity |> 
+  pivot_longer(cols = c(pell,middle,no_need)) |>
+  mutate(name = as_factor(name)) |> 
+  ggplot(aes(x = College,y = value,fill = name)) +
+  geom_col() +
+  theme_den(axis.text=element_text(size=10)) +
+  scale_fill_den() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  coord_flip() +
+  labs(title = "Economic Diversity",
+       subtitle="Ordered by Fraction of Middle Income Students",x = NULL,y = NULL)
+```
+
+Note that this chart is adapted from Greg Sneed's table. Elon is not included but their Pell grant percentage is 10%, which puts them at the bottom of the list.
+
+{{< pagebreak >}}
+## Financial Outcomes: Did We Choose
+
+### Or Did We Rationalize?
+
+-   Financial Outcomes
+    -   Do our students choose lower paying careers than those at other schools?  This has been suggested in the past.
+    -   Does the data reflect the past and are we placing students in higher paying positions today?  This has been suggested recently.
+    -   Do our majors align with lower paying careers? Do our newer majors fix that?
+    -   Does our location feed students back into a lower cost-of-living/salary region?
+    -   Is our career development effective?
+    -   Will the efforts we've made recently pay off in the future?

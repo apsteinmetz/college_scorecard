@@ -1,6 +1,6 @@
-factor,unit,Colgate,Denison,Elon
+item,unit,Colgate,Denison,Elon
 location,geo,"Hamilton, NY","Granville, OH","Elon, NC"
-score,score,79.6,54.6,64
+agg_score,score,79.6,54.6,64
 rank,rank,40,317,232
 salary_impact,score,94,54,75
 graduation_rate,score,74,59,80

@@ -3,7 +3,7 @@ title: "Metrics That Matter?"
 format: 
   revealjs:
     logo: "images/denison_logo.png"
-    background-image: "../images/denison_seal.png"
+    background-image: "images/denison_seal.png"
 editor: visual
 ---
 
@@ -13,6 +13,7 @@ editor: visual
 #| include: false
 library(tidyverse)
 library(denisonbrand)
+library(ggradar)
 load_fonts()
 ```
 
@@ -21,23 +22,45 @@ Irrespective of what rankings people look at or don't, the DOE data shows two pe
 -   Graduation Rate
 -   Financial Outcomes
 
-## Three Schools In The WSJ Rubric
+## A Tale of Three Schools
+### WSJ Rankings: Normalized Survey Scores
 
-### Denison, Colgate, Elon
+```{r}
+transpose_df <- function(df){
+  df |> 
+    pivot_longer(-1) |> 
+    pivot_wider(names_from = 1,values_from = value)
+}
 
-## Do We Choose
+three_schools <- read_csv("data/three_schools.csv",show_col_types = FALSE)
 
-### Or Do We Rationalize (1) ?
+three_schools |> 
+  filter(unit =="score") |> 
+  select(-unit) |> 
+  mutate(across(2:4,as.numeric)) |> 
+  transpose_df()|> 
+  ggradar(grid.max = 100,grid.mid=50,
+          legend.position = "top",
+          axis.label.size = 10,
+          legend.text.size = 20,
+          font.radar = den_fonts["den_display_sans"])
+
+```
+
+ 
+## Demographics: Did We Choose
+
+### Or Did We Rationalize?
 
 -   Middle class demographics
-    -   We cite that as a "diversity" strength.
+    -   We cite "economic diversity" as a strength.
     -   Is that a deliberate policy or an incidental outcome of our localized applicant pool?
     -   Would the college be stronger if we shrank the middle?
 
 ## Middle Income Students Replace Full Pay At Denison
 
 ```{r}
-econ_diversity <- read_csv("../data/econ_diversity.csv") |> 
+econ_diversity <- read_csv("data/econ_diversity.csv") |> 
   select(College,pell,middle,no_need) |>
   mutate(College = fct_reorder(College,middle))
 
@@ -47,7 +70,7 @@ econ_diversity |>
   mutate(name = as_factor(name)) |> 
   ggplot(aes(x = College,y = value,fill = name)) +
   geom_col() +
-  theme_den() +
+  theme_den(axis.text=element_text(size=12)) +
   scale_fill_den() +
   scale_y_continuous(labels = scales::percent_format()) +
   coord_flip() +
@@ -55,13 +78,9 @@ econ_diversity |>
        subtitle="Ordered by Fraction of Middle Income Students",x = NULL,y = NULL)
 ```
 
-## Peer Schools
+## Financial Outcomes: Did We Choose
 
-![](images/econ_diversity.png)
-
-## Do We Choose
-
-### Or Do We Rationalize (2) ?
+### Or Did We Rationalize?
 
 -   Financial Outcomes
     -   Do our students choose lower paying careers than those at other schools?
