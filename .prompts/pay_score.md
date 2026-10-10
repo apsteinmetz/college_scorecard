@@ -2,7 +2,7 @@
 
 ## Goal
 
-Create a shiny app to visualize earning data found here:
+Create a shiny app called "HEA Earning Scorecard" to visualize earning data found here:
 
 ## Main Dashboard Display
 
